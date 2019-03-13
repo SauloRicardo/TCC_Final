@@ -1,0 +1,20 @@
+Ideias para obter a demanda de clientes : 
+
+Analizar o catalogo telefonico da cidade para pegar os endereços com residencia ou comércio. Obs: Nem todos tem tel fixo.
+Analizar alguma base da prefeitura (IPTU) para obter os endereços
+Pior caso : detecção de imagens via satélite (casas e postes), falar com o Paim sobre tal algoritmo
+
+Ideias para obter posição e carga atual dos postes :
+
+Pesquisar alguma API da CEMIG ou solicitar a um provedor de internet tal acesso
+
+Falar com o Diego sobre apoio do  SEBRAE para captação de investidores e patente do Produto.
+
+Pesquisar sobre acesso a base de dados da CEMIG sobre as instalações elétricas na cidade (talvez pela amperagem inferir)
+
+Pode usar distribuiçao uniforme na demanda, para gerar a localização dos clientes, basta sortear lat, lon dentro do range do alcance do escritório central, talvez depois configurar o algoritmo para q sugira posição para escritórios secundários para atender a demanda fora do alcance do escritorio central.
+
+para isso calibrar uma distribuição estatistica com a média e o 
+desvio padrão. Selecione uma área de um bairro populoso e manualmente clique e cima de cada casa coletando a posição (lat, lon) e depois fazer um model fit (pegar script do R no git do tcc do Samuel) 
+
+Interface : fazer o projeto no glade. 
