@@ -58,7 +58,7 @@ fig3, aCmin = plt.subplots()
 
 contaFig = 0
 
-tree = ET.ElementTree(file='formiga.xml')
+tree = ET.ElementTree(file='Xmls/formiga.xml')
 root = tree.getroot()
 
 potsaida = float(ConfigSectionMap('office')['potsaida'])
@@ -175,7 +175,7 @@ def desenhaCaminhoMin(idPto1, idPto2, cor, num):
 
                 if i == caminho[len(caminho)-1]:
                     aCmin.scatter(pontos[i].getLat(), pontos[i].getLon(), marker='o', s=2, c=cor)
-                    #aCmin.annotate(str(num), xy=(pontos[i].getLat(), pontos[i].getLon()), fontsize = 'xx-small')
+                    aCmin.annotate(str(num), xy=(pontos[i].getLat(), pontos[i].getLon()), fontsize = 'xx-small')
 
                 anterior = i
 
@@ -213,7 +213,7 @@ def clusterForcaBruta(ptosOrd):
             if contEsq == esqMax:
                 contEsq = 0
                 contSp += 1
-                fig3.savefig("temp" + str(contaFig) + ".png", dpi=fig3.dpi)
+                fig3.savefig("ClusterImg/temp" + str(contaFig) + ".png", dpi=fig3.dpi)
                 aCmin.cla()
                 contaFig += 1
                 cor = random.choice(colors).get_hex_l()
@@ -284,7 +284,7 @@ def clusterForcaBrutaV2(ptosOrd):
         for x in ptos:
             x.setDistAnt(-1)
 
-        fig3.savefig("temp" + str(contaFig) + ".png", dpi=1000)
+        fig3.savefig("ClusterImg/temp" + str(contaFig) + ".png", dpi=1000)
         #fig3.savefig("temp" + str(contaFig) + ".eps", format='eps', dpi=1000)
         #gmap.draw('map' + str(contaFig) + '.html')
         aCmin.cla()
@@ -464,24 +464,6 @@ print("draw")
 
 if enableMatPlot:
 
-    '''
-    npLat = []
-    npLon = []
-    npId = []
-
-    for x in pontos:
-        if pontos[x].getEsq() > 1:
-            npId.append(pontos[x].getId())
-            npLat.append(pontos[x].getLat())
-            npLon.append(pontos[x].getLon())
-
-    menor = True
-    #pontos = []
-    #kPontos = kMeans(npLat, npLon, esqMax)'''
-
-    '''for i in pontos:
-        if len(i) > 0:
-            ab.scatter(i[:, 0], i[:, 1], s=7, c=random.choice(colors).get_hex_l())'''
 
     pontosOrd = []
     for x in sorted(pontos, key=lambda name: pontos[name].getDistCOffice()):
@@ -492,19 +474,6 @@ if enableMatPlot:
 
     print("VAI COMECAR OS CLUSTER")
     clusterForcaBrutaV2(pontosOrd)
-
-    #todosClusters = agrupaClusters()
-
-    '''for i in todosClusters:
-        posCent = i.getCentroid()
-        ab.scatter(posCent[0], posCent[1], marker='x', s=10, c='#000033')
-        #desenhaCaminhoMin()
-        cor = random.choice(colors).get_hex_l()
-        #print(len(i.getEsquinas()))
-        for j in i.getEsquinas():
-            ab.add_line(mlines.Line2D([posCent[0], j[0]], [posCent[1], j[1]], c='b'))'''
-
-    #desenhaCaminhoMin('1528579849', '3336645422')
 
     '''caminho = nx.dijkstra_path(G, source='1528579849', target='3336645422')
     print(caminho)

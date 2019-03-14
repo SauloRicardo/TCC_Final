@@ -9,6 +9,7 @@ class Ruas(object):
         self.__nome = ''
         self.__ptos = []
         self.__tamRua = 0
+        self.__demanda = 0
 
     def setId (self, id):
         self.__id = id
@@ -22,6 +23,9 @@ class Ruas(object):
     def setTamRua (self, tamRua):
         self.__tamRua = tamRua
 
+    def setDemanda (self, demanda):
+        self.__demanda = demanda
+
     def getId(self):
         return self.__id
 
@@ -33,3 +37,6 @@ class Ruas(object):
 
     def getTamRua(self):
         return self.__tamRua
+
+    def getDemanda(self):
+        return self.__demanda
