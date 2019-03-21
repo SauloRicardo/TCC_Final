@@ -1,4 +1,4 @@
-Ideias para obter a demanda de clientes : 
+﻿Ideias para obter a demanda de clientes : 
 
 Analizar o catalogo telefonico da cidade para pegar os endereços com residencia ou comércio. Obs: Nem todos tem tel fixo.
 Analizar alguma base da prefeitura (IPTU) para obter os endereços
@@ -18,3 +18,6 @@ para isso calibrar uma distribuição estatistica com a média e o
 desvio padrão. Selecione uma área de um bairro populoso e manualmente clique e cima de cada casa coletando a posição (lat, lon) e depois fazer um model fit (pegar script do R no git do tcc do Samuel) 
 
 Interface : fazer o projeto no glade. 
+
+
+HEURISTICAS : Genético, GRASP, colonia de formigas.

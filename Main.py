@@ -16,6 +16,7 @@ import numpy as np
 import geopy.distance
 import scipy
 import Central
+import pyexcel
 
 from matplotlib import pyplot as plt
 import matplotlib.lines as mlines
@@ -83,6 +84,7 @@ central.setcOfficeLon(cOfficeLon)
 central.setcOfficeID(-1)'''
 
 enableGplot = str_to_bool(ConfigSectionMap('boolean')['gplot'])
+enableGrafoPlot = str_to_bool(ConfigSectionMap('boolean')['desenhagrafo'])
 enableMatPlot = True
 esqMax = int(ConfigSectionMap('constantes')['esquinamax']) - 1
 colors = (list(Color('red').range_to(Color('blue'), esqMax+1)))
@@ -175,7 +177,7 @@ def desenhaCaminhoMin(idPto1, idPto2, cor, num):
 
                 if i == caminho[len(caminho)-1]:
                     aCmin.scatter(pontos[i].getLat(), pontos[i].getLon(), marker='o', s=2, c=cor)
-                    aCmin.annotate(str(num), xy=(pontos[i].getLat(), pontos[i].getLon()), fontsize = 'xx-small')
+                    #aCmin.annotate(str(num), xy=(pontos[i].getLat(), pontos[i].getLon()), fontsize = 'xx-small')
 
                 anterior = i
 
@@ -221,6 +223,7 @@ def clusterForcaBruta(ptosOrd):
 
 def clusterForcaBrutaV2(ptosOrd):
     global contaFig
+    contaFig = 0
     ptos = ptosOrd
 
     while ptos[0].getDistCOffice() == -1:
@@ -244,7 +247,7 @@ def clusterForcaBrutaV2(ptosOrd):
             tamCabo = ptoIni.getDistCOffice() + caminhoMinimo(ptoIni.getId(), x.getId())
             atenuacao = calculaAtenua(tamCabo/1000, mono_1310, 2, conector, 6, emendaFusao, (divisor1_16 + divisor1_4))
             if x.getDistAnt() != -1 and tamCabo < 20000 \
-                    and atenuacao < potsaida:
+                    and atenuacao < potsaida: #TODO verificar saturação
                 print("Distancia da esquina " + str(contEsq) + " eh : " +
                       str(tamCabo) + "e a atenuacao eh : " + str(atenuacao))
 
@@ -284,7 +287,100 @@ def clusterForcaBrutaV2(ptosOrd):
         for x in ptos:
             x.setDistAnt(-1)
 
-        fig3.savefig("ClusterImg/temp" + str(contaFig) + ".png", dpi=1000)
+        fig3.savefig("ClustersImg/temp" + str(contaFig) + ".png", dpi=1000)
+        #fig3.savefig("temp" + str(contaFig) + ".eps", format='eps', dpi=1000)
+        #gmap.draw('map' + str(contaFig) + '.html')
+        aCmin.cla()
+        contaFig += 1
+
+def clusterForcaBrutaDemanda(ptosOrd, ruas, idRuas):
+    global contaFig
+    contaFig = 0
+    ptos = ptosOrd
+
+    while ptos[0].getDistCOffice() == -1:
+        del ptos[0]
+
+    while len(ptos) > 0:
+        ruasEsquina = []
+        ruasAtendidas = []
+        demandaTotal = 0
+
+        nx.draw_networkx(G, node_size = 0.5, node_color = 'grey', alpha = 0.5, with_labels = False, pos = posPontos)
+        contEsq = 0
+        ptoIni = ptos.pop(0)
+        desenhaCaminhoMin(ptoIni.getId(), cOfficeID, colors[0].get_hex_l(), 0)
+
+        for x in idRuas:
+            if ptoIni in ruas[x].getPtos():
+                ruasEsquina.append(ruas[x])
+
+        for k in ruasEsquina:
+            demandaTotal += k.getDemanda()
+            if demandaTotal > 128:
+                demandaTotal -= k.getDemanda()
+            else:
+                ruasAtendidas.append(k)
+
+        #print("ANTES")
+        #print(len(ptos))
+        for k in ruasAtendidas: # NAO É n^3
+            #print(k.getNome())
+            for p in k.getPtos():
+                if p.getEsq() > 1:
+                    for q in ptos:
+                        if p.getId() == q.getId():
+                            ptos.remove(q)
+        #print("DEPOIS")
+        #print(len(ptos))
+
+        for x in ptos:
+            x.setDistAnt(caminhoMinimo(x.getId(), ptoIni.getId()))
+
+        ptos = sorted(ptos, key = Pontos.getDistAnt)
+
+        ptosRemover = []
+        ruasEsquina = []
+        ruasAtendidas = []
+        demandaTotal = 0
+
+        #TODO fazer a função de remover pontos para os seguintes
+        print(contaFig)
+        while contEsq < esqMax:
+            tamCabo = ptoIni.getDistCOffice() + caminhoMinimo(ptoIni.getId(), ptos[contEsq].getId())
+            atenuacao = calculaAtenua(tamCabo/1000, mono_1310, 2, conector, 6, emendaFusao, (divisor1_16 + divisor1_4))
+            if ptos[contEsq].getDistAnt() != -1 and tamCabo < 20000 \
+                    and atenuacao < potsaida:
+                #print("Distancia da esquina " + str(contEsq) + " eh : " +
+                #     str(tamCabo) + "e a atenuacao eh : " + str(atenuacao))
+
+                desenhaCaminhoMin(ptoIni.getId(), ptos[contEsq].getId(), colors[contEsq].get_hex_l(), contEsq + 1)
+                contEsq += 1
+                ptosRemover.append(ptos[contEsq])
+
+                for x in idRuas:
+                    if ptos[contEsq] in ruas[x].getPtos():
+                        ruasEsquina.append(ruas[x])
+
+                for k in ruasEsquina:
+                    demandaTotal += k.getDemanda()
+                    if demandaTotal > 128:
+                        demandaTotal -= k.getDemanda()
+                    else:
+                        ruasAtendidas.append(k)
+
+                for k in ruasAtendidas:  # NAO É n^3
+                    # print(k.getNome())
+                    for p in k.getPtos():
+                        if p.getEsq() > 1:
+                            for q in ptos:
+                                if p.getId() == q.getId():
+                                    ptos.remove(q)
+
+        for x in ptos:
+            x.setDistAnt(-1)
+
+        fig3.savefig("ClustersImg/temp" + str(contaFig) + ".png", dpi=1000)
         #fig3.savefig("temp" + str(contaFig) + ".eps", format='eps', dpi=1000)
         #gmap.draw('map' + str(contaFig) + '.html')
         aCmin.cla()
@@ -378,7 +474,8 @@ if enableGplot:
 #------------------------CRIA A LISTA DE RUAS E AS PLOTA---------------------------------
 #----------------------------------------------------------------------------------------
 
-ruas = []
+ruas = dict()
+idRuas = []
 contGrap = 0
 for child_of_root in root:
     if child_of_root.tag == 'way':
@@ -412,14 +509,30 @@ for child_of_root in root:
                 except Exception:
                     continue
 
+            if child_child.tag == 'tag':
+                if child_child.attrib['k'] == 'name':
+                    rua.setNome(child_child.attrib['v'])
+
+
         if len(rua.getPtos()) != 0:
             rua.setTamRua(calculaTamRua(rua))
-            ruas.append(rua)
+            ruas[rua.getId()] = rua
+            idRuas.append(child_of_root.attrib['id'])
 
-        if enableGplot and len(tuplaRua) != 0:
-            ruaLat, ruaLon = zip(*tuplaRua)
-            gmap.scatter(ruaLat, ruaLon, '#3B0B39', size=5, marker=False)
-            gmap.plot(ruaLat, ruaLon, 'cornflowerblue', edge_width=3)
+        #if enableGplot and len(tuplaRua) != 0:
+        #    ruaLat, ruaLon = zip(*tuplaRua)
+        #    gmap.scatter(ruaLat, ruaLon, '#3B0B39', size=5, marker=False)
+        #    gmap.plot(ruaLat, ruaLon, 'cornflowerblue', edge_width=3)
+
+sheet = pyexcel.get_sheet(file_name='demanda.csv')
+
+sheetAux = iter(sheet)
+next(sheetAux) #pula a primeira iteração da tabela que contém a palavra demanda
+for row in sheetAux:
+    ruas[str(row[1])].setDemanda(row[0])
+    #print(ruas[str(row[1])].getNome() + 'Demanda ' +  str(ruas[str(row[1])].getDemanda()))
+
+print('Ruas Preenchidas com as demandas')
 
 posPontos = dict()
 for x in pontos:
@@ -464,16 +577,50 @@ print("draw")
 
 if enableMatPlot:
 
-
     pontosOrd = []
     for x in sorted(pontos, key=lambda name: pontos[name].getDistCOffice()):
         pontosOrd.append(pontos[x])
 
+
+    #ptosRem = []
+    #for x in pontosOrd:
+    #    if x.getEsq() > 2:
+    #        ptosRem.append(x)
+
+    #for x in ptosRem:
+    #    pontosOrd.remove(x)
+
     pontosOrdRemove = []
     ptoAnt = Pontos()
 
+    '''
+    print(len(ruas))
+    temRepetido = True
+    ruasAgrupar = []
+    idRuasAux = idRuas
+    contAux = 0
+    while temRepetido:
+        temRepetido = False
+        pulaPrimeiro = 0
+
+        for x in idRuasAux:
+            if pulaPrimeiro == 0:
+                pulaPrimeiro += 1
+
+            elif ruas[x].getNome() == ruas[y].getNome():
+                ruasRemover.append(y)
+                ruas[x].setDemanda(ruas[x].getDemanda() + ruas[y].getDemanda())
+                for k in ruas[y].getPtos():
+                    ruas[x].setPto(k)
+
+    for x in ruasRemover:
+        del ruas[x]
+
+    print(len(ruas))
+    '''
+
     print("VAI COMECAR OS CLUSTER")
-    clusterForcaBrutaV2(pontosOrd)
+    clusterForcaBrutaDemanda(pontosOrd, ruas, idRuas)
 
     '''caminho = nx.dijkstra_path(G, source='1528579849', target='3336645422')
     print(caminho)

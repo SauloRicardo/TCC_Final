@@ -9,6 +9,8 @@ from colour import Color
 import geopy.distance
 import configparser
 import pyexcel
+import numpy as np
+from scipy.stats import dweibull
 
 
 from matplotlib import pyplot as plt
@@ -129,6 +131,27 @@ def caminhoMinimo(idPto1, idPto2):
 
     return total
 
+
+def removeRuasRep(ruas):
+    ruas_ordenadas = sorted(ruas, key=Ruas.getNome)
+    ruasRemover = dict()
+    teveIgual = True
+
+    ruaAnt = ruas_ordenadas[0]
+    ruasRemover[ruaAnt.getNome()] = []
+    ruasRemover[ruaAnt.getNome()].append(ruaAnt)
+
+    ruasIter = iter(ruas_ordenadas)
+    next(ruasIter)
+    for x in ruasIter:
+        if x.getNome() != ruaAnt.getNome():
+            del(ruasRemover[x.getNome()])
+
+        else:
+            ruasRemover[x.getNome()].append(x)
+
+    return ruasRemover
+
 #----------------------------------------------------------------------------------------
 #-----------------------------REMOVE ROTÁTORIAS E SINAIS---------------------------------
 #----------------------------------------------------------------------------------------
@@ -227,6 +250,7 @@ remove = []
 nomesRuas = []
 tamanhoRuas = []
 demandaRuas = []
+idRuas = []
 
 for x in ruas_ordenadas:
     if (x.getTamRua() == 0) or (x.getNome() == ''):
@@ -235,16 +259,26 @@ for x in ruas_ordenadas:
 for x in remove:
     ruas_ordenadas.remove(x)
 
+#ruasRetirar = removeRuasRep(ruas_ordenadas)
+#for x in ruasRetirar:
+#    print("Rua repetida : ")
+#    for y in x:
+#        print(y.getNome())
+
+i = 0
 for x in ruas_ordenadas:
+    np.random.weibull(5.)
     #print('Nome :' + x.getNome() + ', Tamanho da rua : ' + str(x.getTamRua()))
+    idRuas.append(x.getId())
     nomesRuas.append(x.getNome())
     #tamanhoRuas.append(str(x.getTamRua()))
-    demandaRuas.append('0')
+    demandaRuas.append(int(np.ceil((np.random.weibull(5.)*x.getTamRua()/20))))
 
 dicionarioExcel = {
-    "Nome da Rua": nomesRuas,
     #"Tamanho da Rua": tamanhoRuas,
-    "Demanda" : demandaRuas
+    "Demanda" : demandaRuas,
+    "ID" : idRuas,
+    "Nome da Rua": nomesRuas,
 }
 
 for x in dicionarioExcel:
@@ -252,4 +286,8 @@ for x in dicionarioExcel:
     print(dicionarioExcel[x])
 
 sheet = pyexcel.get_sheet(adict=dicionarioExcel)
-sheet.save_as("output.csv")
+sheet.save_as("demanda.csv")
+
+#sheet = pyexcel.get_sheet(file_name='demanda.csv')
+#for row in sheet:
+#    print("%s: %s" % (row[0], row[1]))
