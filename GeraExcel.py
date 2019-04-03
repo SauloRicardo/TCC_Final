@@ -63,7 +63,7 @@ colors = (list(Color('red').range_to(Color('blue'), esqMax+1)))
 plt.rcParams['figure.figsize'] = (16, 9)
 plt.style.use('ggplot')
 
-distanciaTeste = 1000
+distanciaTeste = 2000
 
 G = nx.Graph()
 

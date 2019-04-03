@@ -94,7 +94,7 @@ colors = (list(Color('red').range_to(Color('blue'), esqMax+1)))
 plt.rcParams['figure.figsize'] = (16, 9)
 plt.style.use('ggplot')
 
-distanciaTeste = 1000
+distanciaTeste = 2000
 
 G = nx.Graph()
 
@@ -307,6 +307,7 @@ def clusterForcaBrutaDemanda(ptosOrd, ruasSR, idRuasSR):
         del ptosLocal[0]
 
     while len(ptosLocal) > 0:
+        qtdAnt = len(ptosLocal)
         ruasEsquina = []
         ruasAtendidas = []
         demandaTotal = 0
@@ -357,15 +358,14 @@ def clusterForcaBrutaDemanda(ptosOrd, ruasSR, idRuasSR):
             demandaTotal = 0
 
             #tamCabo = ptoIni.getDistCOffice() + caminhoMinimo(ptoIni.getId(), ptosLocal[contEsq].getId())
-            tamCabo = caminhoMinimo(cOfficeID.getId(), ptosLocal[contEsq].getId())
+            tamCabo = caminhoMinimo(cOfficeID, ptosLocal[contEsq].getId())
 
             atenuacao = calculaAtenua(tamCabo/1000, mono_1310, 2, conector, 6, emendaFusao, (divisor1_16 + divisor1_4))
-            if ptosLocal[contEsq].getDistAnt() != -1 and tamCabo < 20000 \
-                    and atenuacao < potsaida:
+            if tamCabo < 20000 and atenuacao < potsaida:
                 #print("Distancia da esquina " + str(contEsq) + " eh : " +
                 #     str(tamCabo) + "e a atenuacao eh : " + str(atenuacao))
 
-                desenhaCaminhoMin(ptoIni.getId(), ptosLocal[contEsq].getId(), colors[contEsq].get_hex_l(), contEsq + 1)
+                desenhaCaminhoMin(cOfficeID, ptosLocal[contEsq].getId(), colors[contEsq].get_hex_l(), contEsq + 1)
                 ptosRemover.append(ptosLocal[contEsq])
 
                 for x in idRuasLocal:
@@ -386,15 +386,20 @@ def clusterForcaBrutaDemanda(ptosOrd, ruasSR, idRuasSR):
                     for ptoRua in k.getPtos():
                         for todosPtos in ptosLocal:
                             if ptoRua.getId() == todosPtos.getId():
-                                ptosLocal.remove(todosPtos)
+                                if ptosLocal[contEsq] not in ptosRemover:
+                                    ptosRemover.append(ptosLocal[contEsq])
+
+                                #ptosLocal.remove(todosPtos)
                                 break
 
                     del ruasLocal[k.getNome()]
 
+                for k in ptosRemover:
+                    ptosLocal.remove(k)
                 contEsq += 1
 
-        for x in ptosLocal:
-            x.setDistAnt(-1)
+        #for x in ptosLocal:
+        #    x.setDistAnt(-1)
 
         fig3.savefig("ClustersImg/temp" + str(contaFig) + ".png", dpi=1000)
         #fig3.savefig("temp" + str(contaFig) + ".eps", format='eps', dpi=1000)
@@ -404,6 +409,8 @@ def clusterForcaBrutaDemanda(ptosOrd, ruasSR, idRuasSR):
 
 
         print("Iteracao : " + str(contaFig))
+        print ("quantidade de pontos removidos" + str(qtdAnt - len(ptosLocal)))
+
 
     for x in sorted(todasRuasAtendidas):
         print(x)
