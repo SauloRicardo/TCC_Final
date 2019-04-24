@@ -13,8 +13,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="208">
-              <caret line="499" column="35" selection-start-line="499" selection-start-column="35" selection-end-line="499" selection-end-column="35" />
+            <state relative-caret-position="188">
+              <caret line="1016" column="25" selection-start-line="1016" selection-start-column="25" selection-end-line="1016" selection-end-column="25" />
               <folding>
                 <element signature="e#105#123#0" expanded="true" />
               </folding>
@@ -25,8 +25,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/GeraExcel.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="142">
-              <caret line="65" column="18" selection-start-line="65" selection-start-column="18" selection-end-line="65" selection-end-column="18" />
+            <state relative-caret-position="1080">
+              <caret line="65" column="19" selection-start-line="65" selection-start-column="19" selection-end-line="65" selection-end-column="19" />
               <folding>
                 <element signature="e#105#123#0" expanded="true" />
               </folding>
@@ -65,7 +65,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Ruas.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="518">
+            <state relative-caret-position="800">
               <caret line="40" column="18" selection-start-line="40" selection-start-column="8" selection-end-line="40" selection-end-column="18" />
             </state>
           </provider>
@@ -91,18 +91,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>ax</find>
-      <find>ab</find>
-      <find>aCmin</find>
-      <find>acmin</find>
-      <find>gmap</find>
-      <find>distanciaTeste</find>
-      <find>distancia</find>
-      <find>pos</find>
-      <find>pontos</find>
-      <find>draw_networkx</find>
-      <find>next</find>
-      <find>n</find>
       <find>contaFig</find>
       <find>colors</find>
       <find>nx.draw</find>
@@ -117,10 +105,22 @@
       <find>del''</find>
       <find>ptos</find>
       <find>cOfficeID</find>
-      <find>print</find>
       <find>contEsq</find>
       <find>sort</find>
       <find>k</find>
+      <find>ptosRemover</find>
+      <find>ruas[name].getDemanda()</find>
+      <find>ruasEsquina = sorted(ruasEsquina, key=lambda name: ruas[name].getDemanda())</find>
+      <find>sorted</find>
+      <find>ordenaLista</find>
+      <find>ptosRemover = []</find>
+      <find>del ruasLocal[k.getNome()]</find>
+      <find>splitterQtd</find>
+      <find>splitterPrimQtd</find>
+      <find>print</find>
+      <find>desenhaCaminhoMin(cOfficeID, ptosLocal[0].getId(), colors[0].get_hex_l(), 0)</find>
+      <find>desenhaCaminhoMin</find>
+      <find>desenhaCaminhoMin(cOfficeID, ptosLocal[0].getId(), colors[w].get_hex_l(), 1)</find>
     </findStrings>
     <replaceStrings>
       <replace>AuxiliarFunctions.distancia</replace>
@@ -131,6 +131,13 @@
       <replace>ptosLocal</replace>
       <replace>0</replace>
       <replace>ruasEsquina[0]</replace>
+      <replace>ruas[name].getDemanda</replace>
+      <replace>ruasAtendidas = []</replace>
+      <replace>#del ruasLocal[k.getNome()]</replace>
+      <replace>#print</replace>
+      <replace>splitterPrimQtd</replace>
+      <replace>splitterSecQtd</replace>
+      <replace>desenhaCaminhoMin(cOfficeID, ptosLocal[0].getId(), colors[w].get_hex_l(), w)</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -176,20 +183,7 @@
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
-    <panes>
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="TCC_VersaoExcel" type="b2602c69:ProjectViewProjectNode" />
-              <item name="TCC_VersaoExcel" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
-      <pane id="Scope" />
-    </panes>
+    <panes />
   </component>
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
@@ -324,8 +318,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1550" height="838" extended-state="7" />
-    <editor active="true" />
+    <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.2538004" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -335,7 +328,7 @@
       <window_info id="Job Explorer" order="5" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.4976867" visible="true" weight="0.32577905" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4976867" weight="0.32577905" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.398017" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -453,6 +446,26 @@
     <entry file="file://$PROJECT_DIR$/depecrated">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
+    <entry file="file://$PROJECT_DIR$/Main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="188">
+          <caret line="1016" column="25" selection-start-line="1016" selection-start-column="25" selection-end-line="1016" selection-end-column="25" />
+          <folding>
+            <element signature="e#105#123#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/GeraExcel.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1080">
+          <caret line="65" column="19" selection-start-line="65" selection-start-column="19" selection-end-line="65" selection-end-column="19" />
+          <folding>
+            <element signature="e#105#123#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Central.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="400">
@@ -473,37 +486,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/deprecated.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="760">
-          <caret line="38" selection-start-line="38" selection-end-line="38" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Ruas.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="518">
+        <state relative-caret-position="800">
           <caret line="40" column="18" selection-start-line="40" selection-start-column="8" selection-end-line="40" selection-end-column="18" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/GeraExcel.py">
+    <entry file="file://$PROJECT_DIR$/deprecated.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="142">
-          <caret line="65" column="18" selection-start-line="65" selection-start-column="18" selection-end-line="65" selection-end-column="18" />
-          <folding>
-            <element signature="e#105#123#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="208">
-          <caret line="499" column="35" selection-start-line="499" selection-start-column="35" selection-end-line="499" selection-end-column="35" />
-          <folding>
-            <element signature="e#105#123#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="760">
+          <caret line="38" selection-start-line="38" selection-end-line="38" />
         </state>
       </provider>
     </entry>

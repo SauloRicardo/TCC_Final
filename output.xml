@@ -2,6 +2,8 @@
 <note>The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.</note>
 <meta osm_base="2018-06-07T16:27:02Z" />
 
+
+
   <way id="31588417">
     <nd ref="353461458" />
     <nd ref="2386701590" />
@@ -13833,6 +13835,10 @@
     <nd ref="5420413016" />
     <tag k="highway" v="tertiary" />
   </way>
+
+
+
+
   <node id="1528617188" lat="-20.5730405" lon="-45.4762313" />
   <node id="4243766030" lat="-20.5742351" lon="-45.4780953" />
   <node id="1528617001" lat="-20.5685405" lon="-45.4709688" />

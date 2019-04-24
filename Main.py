@@ -89,12 +89,12 @@ enableGplot = str_to_bool(ConfigSectionMap('boolean')['gplot'])
 enableGrafoPlot = str_to_bool(ConfigSectionMap('boolean')['desenhagrafo'])
 enableMatPlot = True
 esqMax = int(ConfigSectionMap('constantes')['esquinamax']) - 1
-colors = (list(Color('red').range_to(Color('blue'), esqMax+1)))
+colors = (list(Color('red').range_to(Color('blue'), 64)))
 
 plt.rcParams['figure.figsize'] = (16, 9)
 plt.style.use('ggplot')
 
-distanciaTeste = 500
+distanciaTeste = 2000
 
 G = nx.Graph()
 
@@ -173,12 +173,12 @@ def desenhaCaminhoMin(idPto1, idPto2, cor, num):
                 anterior = i
             else:
                 aCmin.add_line(mlines.Line2D([pontos[i].getLat(), pontos[anterior].getLat()],
-                                          [pontos[i].getLon(), pontos[anterior].getLon()], linewidth = 2, c=cor))
+                                          [pontos[i].getLon(), pontos[anterior].getLon()], linewidth = 2, c=cor, alpha = 0.3))
 
                 #gmap.directions_layer([pontos[i].getLat(), pontos[anterior].getLat()], [pontos[i].getLon(), pontos[anterior].getLon()], 'cornflowerblue', edge_width=3)
 
                 if i == caminho[len(caminho)-1]:
-                    aCmin.scatter(pontos[i].getLat(), pontos[i].getLon(), marker='o', s=5, c=cor)
+                    aCmin.scatter(pontos[i].getLat(), pontos[i].getLon(), marker='o', s=10, c=cor)
                     #aCmin.annotate(str(num), xy=(pontos[i].getLat(), pontos[i].getLon()), fontsize = 'xx-small')
 
                 anterior = i
@@ -317,8 +317,10 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
     ptosLocal = ptosOrd
     ruasLocal = ruasSR
     idRuasLocal = idRuasSR
-    splitterQtd = [('1/2', 0), ('1/4', 0), ('1/8', 0), ('1/16', 0), ('1/32', 0), ('1/64', 0)]
-    splitterQtd = dict(splitterQtd)
+    splitterPrimQtd = [('1/2', 0), ('1/4', 0), ('1/8', 0), ('1/16', 0), ('1/32', 0), ('1/64', 0)]
+    splitterPrimQtd = dict(splitterPrimQtd)
+    splitterSecQtd = [('1/2', 0), ('1/4', 0), ('1/8', 0), ('1/16', 0), ('1/32', 0), ('1/64', 0)]
+    splitterSecQtd = dict(splitterSecQtd)
 
     while ptosLocal[0].getDistCOffice() == -1:
         del ptosLocal[0]
@@ -339,20 +341,21 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
 
         if tamCabo < 20000:
 
-            desenhaCaminhoMin(cOfficeID, ptosLocal[0].getId(), colors[0].get_hex_l(), 1)
+            desenhaCaminhoMin(cOfficeID, ptosLocal[0].getId(), colors[0].get_hex_l(), 0)
 
             for x in idRuasLocal:
                 if ptosLocal[0] in ruasLocal[x].getPtos():
                     ruasEsquina.append(ruasLocal[x])
 
-            ruasEsquina = sorted(ruasEsquina, key=lambda name: ruas[name].getDemanda())
+            if len(ruasEsquina) == 0:
+                break
 
-            #DEFINE O SPLITTER PRIMARIO E OS SECUNDARIOS ATENDE O PRIMEIRO CONJUNTO DE RUAS
+#-----------DEFINE O SPLITTER PRIMARIO E OS SECUNDARIOS ATENDE O PRIMEIRO CONJUNTO DE RUAS
             if ruasEsquina[0].getDemanda() > 64:
                 splitterPrim = '1/2'
                 splitterSec = '1/64'
-                splitterQtd[splitterPrim] += 1
-                splitterQtd[splitterSec] += 2
+                splitterPrimQtd[splitterPrim] += 1
+                splitterSecQtd[splitterSec] += 2
                 ruasEsquina[0].setDemanda(ruasEsquina[0].getDemanda() - 64)
                 ptosLocal.remove(ptosLocal[0])
                 sobra = 0
@@ -360,8 +363,8 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
             elif ruasEsquina[0].getDemanda() > 32:
                 splitterPrim = '1/2'
                 splitterSec = '1/64'
-                splitterQtd[splitterPrim] += 1
-                splitterQtd[splitterSec] += 2
+                splitterPrimQtd[splitterPrim] += 1
+                splitterSecQtd[splitterSec] += 2
                 ruasAtendidas.append(ruasEsquina[0])
                 if ruasEsquina[0].getDemanda() == 64:
                     sobra = 0
@@ -382,8 +385,8 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
             elif ruasEsquina[0].getDemanda() > 16:
                 splitterPrim = '1/4'
                 splitterSec = '1/32'
-                splitterQtd[splitterPrim] += 1
-                splitterQtd[splitterSec] += 4
+                splitterPrimQtd[splitterPrim] += 1
+                splitterSecQtd[splitterSec] += 4
                 ruasAtendidas.append(ruasEsquina[0])
                 if ruasEsquina[0].getDemanda() == 32:
                     sobra = 0
@@ -403,8 +406,8 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
             elif ruasEsquina[0].getDemanda() > 8:
                 splitterPrim = '1/8'
                 splitterSec = '1/16'
-                splitterQtd[splitterPrim] += 1
-                splitterQtd[splitterSec] += 8
+                splitterPrimQtd[splitterPrim] += 1
+                splitterSecQtd[splitterSec] += 8
                 ruasAtendidas.append(ruasEsquina[0])
                 if ruasEsquina[0].getDemanda() == 16:
                     sobra = 0
@@ -424,8 +427,8 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
             elif ruasEsquina[0].getDemanda() > 4:
                 splitterPrim = '1/16'
                 splitterSec = '1/8'
-                splitterQtd[splitterPrim] += 1
-                splitterQtd[splitterSec] += 16
+                splitterPrimQtd[splitterPrim] += 1
+                splitterSecQtd[splitterSec] += 16
                 ruasAtendidas.append(ruasEsquina[0])
                 if ruasEsquina[0].getDemanda() == 8:
                     sobra = 0
@@ -445,8 +448,8 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
             elif ruasEsquina[0].getDemanda() > 2:
                 splitterPrim = '1/32'
                 splitterSec = '1/4'
-                splitterQtd[splitterPrim] += 1
-                splitterQtd[splitterSec] += 32
+                splitterPrimQtd[splitterPrim] += 1
+                splitterSecQtd[splitterSec] += 32
                 ruasAtendidas.append(ruasEsquina[0])
                 if ruasEsquina[0].getDemanda() == 4:
                     sobra = 0
@@ -466,8 +469,8 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
             else:
                 splitterPrim = '1/64'
                 splitterSec = '1/2'
-                splitterQtd[splitterPrim] += 1
-                splitterQtd[splitterSec] += 64
+                splitterPrimQtd[splitterPrim] += 1
+                splitterSecQtd[splitterSec] += 64
                 ruasAtendidas.append(ruasEsquina[0])
                 if ruasEsquina[0].getDemanda() == 2:
                     sobra = 0
@@ -485,123 +488,300 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
                             ruasAtendidas.append(k)
 
             for k in ruasAtendidas:  # NAO É n^3
-                print(k.getNome())
+                #print(k.getNome())
                 if k.getNome() in idRuasLocal:
                     idRuasLocal.remove(k.getNome())
                 for ptoRua in k.getPtos():
                     for todosPtos in ptosLocal:
                         if ptoRua.getId() == todosPtos.getId():
-                            if ptosLocal[0] not in ptosRemover:
-                                ptosRemover.append(ptosLocal[0])
+                            if todosPtos not in ptosRemover:
+                                ptosRemover.append(todosPtos)
                             break
                 del ruasLocal[k.getNome()]
 
             for k in ptosRemover:
                 ptosLocal.remove(k)
 
-            # COM OS SPLITTERS DEFINIDOS ATENDE AO CLUSTER DE RUAS RESPECTIVOS AO TIPO DE SPLITER
+            ruasAtendidas = []
+            ptosRemover = []
 
+            if len(ptosLocal) == 0:
+                break
+# ------------------------------------------------------------------------------------------------
+#-------------COM OS SPLITTERS DEFINIDOS ATENDE AO CLUSTER DE RUAS RESPECTIVOS AO TIPO DE SPLITER
+#------------------------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------------------------
+#-------------------------------Caso o splitter primerio seja 1/2--------------------------------
+#------------------------------------------------------------------------------------------------
             if splitterPrim == '1/2':
-                if k.getDemanda() > 64:
-                    k.setDemanda(k.getDemanda()-64)
+                desenhaCaminhoMin(cOfficeID, ptosLocal[0].getId(), colors[1].get_hex_l(), 1)
 
-                elif k.getDemanda() > 32:
-                    ruasAtendidas.append(k)
+                for x in idRuasLocal:
+                    if ptosLocal[0] in ruasLocal[x].getPtos():
+                        ruasEsquina.append(ruasLocal[x])
+                if len(ruasEsquina) == 0:
+                    break
+                sobra = 64
+                ptosLocal.remove(ptosLocal[0])
 
-                elif k.getDemanda() > 16:
-                    ruasAtendidas.append(k)
+                for k in ruasEsquina:
+                    if sobra <= 0:
+                        break
 
-                elif k.getDemanda() > 8:
-                    ruasAtendidas.append(k)
+                    elif k.getDemanda() - sobra <= 0:
+                        ruasAtendidas.append(k)
+                        sobra -= k.getDemanda()
 
-                elif k.getDemanda() > 4:
-                    ruasAtendidas.append(k)
+                    else:
+                        k.setDemanda(k.getDemanda()-sobra)
+                        sobra = 0
 
-                elif k.getDemanda() > 2:
-                    ruasAtendidas.append(k)
+                for k in ruasAtendidas:  # NAO É n^3
+                    #print(k.getNome())
+                    if k.getNome() in idRuasLocal:
+                        idRuasLocal.remove(k.getNome())
+                    for ptoRua in k.getPtos():
+                        for todosPtos in ptosLocal:
+                            if ptoRua.getId() == todosPtos.getId():
+                                if todosPtos not in ptosRemover:
+                                    ptosRemover.append(todosPtos)
+                                break
+#                    del ruasLocal[k.getNome()]
 
-                else:
-                    ruasAtendidas.append(k)
+                for k in ptosRemover:
+                    ptosLocal.remove(k)
 
+                ruasAtendidas = []
+                ptosRemover = []
+
+#------------------------------------------------------------------------------------------------
+#-------------------------------Caso o splitter primerio seja 1/4--------------------------------
+#------------------------------------------------------------------------------------------------
             elif splitterPrim == '1/4':
-                if k.getDemanda() > 32:
-                    k.setDemanda(k.getDemanda()-32)
+                for w in range(1, 4):
+                    desenhaCaminhoMin(cOfficeID, ptosLocal[0].getId(), colors[w].get_hex_l(), w)
 
-                elif k.getDemanda() > 16:
-                    ruasAtendidas.append(k)
+                    for x in idRuasLocal:
+                        if ptosLocal[0] in ruasLocal[x].getPtos():
+                            ruasEsquina.append(ruasLocal[x])
+                    if len(ruasEsquina) == 0:
+                        break
 
-                elif k.getDemanda() > 8:
-                    ruasAtendidas.append(k)
+                    sobra = 32
+                    ptosLocal.remove(ptosLocal[0])
 
-                elif k.getDemanda() > 4:
-                    ruasAtendidas.append(k)
-
-                elif k.getDemanda() > 2:
-                    ruasAtendidas.append(k)
-
-                else:
-                    ruasAtendidas.append(k)
-
-            elif splitterPrim == '1/8':
-                if k.getDemanda() > 16:
-                    k.setDemanda(k.getDemanda()-16)
-
-                elif k.getDemanda() > 8:
-                    ruasAtendidas.append(k)
-
-                elif k.getDemanda() > 4:
-                    ruasAtendidas.append(k)
-
-                elif k.getDemanda() > 2:
-                    ruasAtendidas.append(k)
-
-                else:
-                    ruasAtendidas.append(k)
-
-            elif splitterPrim == '1/16':
-                if k.getDemanda() > 8:
-                    k.setDemanda(k.getDemanda()-8)
-
-                elif k.getDemanda() > 4:
-                    ruasAtendidas.append(k)
-
-                elif k.getDemanda() > 2:
-                    ruasAtendidas.append(k)
-
-                else:
-                    ruasAtendidas.append(k)
-
-            elif splitterPrim == '1/32':
-                if  k.getDemanda() > 4:
-                    k.setDemanda(k.getDemanda()-4)
-
-                elif k.getDemanda() > 2:
-                    ruasAtendidas.append(k)
-
-                else:
-                    ruasAtendidas.append(k)
-
-            elif splitterPrim == '1/64':
-                if k.getDemanda() > 2:
-                    k.setDemanda(k.getDemanda()-2)
-
-                else:
-                    ruasAtendidas.append(k)
-
-            for k in ruasAtendidas:  # NAO É n^3
-                print(k.getNome())
-                if k.getNome() in idRuasLocal:
-                    idRuasLocal.remove(k.getNome())
-                for ptoRua in k.getPtos():
-                    for todosPtos in ptosLocal:
-                        if ptoRua.getId() == todosPtos.getId():
-                            if ptosLocal[0] not in ptosRemover:
-                                ptosRemover.append(ptosLocal[0])
+                    for k in ruasEsquina:
+                        if sobra <= 0:
                             break
-                del ruasLocal[k.getNome()]
 
-            for k in ptosRemover:
-                ptosLocal.remove(k)
+                        elif k.getDemanda() - sobra <= 0:
+                            ruasAtendidas.append(k)
+                            sobra -= k.getDemanda()
+
+                        else:
+                            k.setDemanda(k.getDemanda() - sobra)
+                            sobra = 0
+
+                    for k in ruasAtendidas:  # NAO É n^3
+                        #print(k.getNome())
+                        if k.getNome() in idRuasLocal:
+                            idRuasLocal.remove(k.getNome())
+                        for ptoRua in k.getPtos():
+                            for todosPtos in ptosLocal:
+                                if ptoRua.getId() == todosPtos.getId():
+                                    if todosPtos not in ptosRemover:
+                                        ptosRemover.append(todosPtos)
+                                    break
+#                        del ruasLocal[k.getNome()]
+
+                    for k in ptosRemover:
+                        ptosLocal.remove(k)
+                    ruasAtendidas = []
+                    ptosRemover = []
+
+# ------------------------------------------------------------------------------------------------
+# -------------------------------Caso o splitter primário seja 1/8--------------------------------
+# ------------------------------------------------------------------------------------------------
+            elif splitterPrim == '1/8':
+                for w in range(1, 8):
+                    desenhaCaminhoMin(cOfficeID, ptosLocal[0].getId(), colors[w].get_hex_l(), w)
+
+                    for x in idRuasLocal:
+                        if ptosLocal[0] in ruasLocal[x].getPtos():
+                            ruasEsquina.append(ruasLocal[x])
+                    if len(ruasEsquina) == 0:
+                        break
+
+                    ptosLocal.remove(ptosLocal[0])
+                    sobra = 16
+
+                    for k in ruasEsquina:
+                        if sobra <= 0:
+                            break
+
+                        elif k.getDemanda() - sobra <= 0:
+                            ruasAtendidas.append(k)
+                            sobra -= k.getDemanda()
+
+                        else:
+                            k.setDemanda(k.getDemanda() - sobra)
+                            sobra = 0
+
+                    for k in ruasAtendidas:  # NAO É n^3
+                        #print(k.getNome())
+                        if k.getNome() in idRuasLocal:
+                            idRuasLocal.remove(k.getNome())
+                        for ptoRua in k.getPtos():
+                            for todosPtos in ptosLocal:
+                                if ptoRua.getId() == todosPtos.getId():
+                                    if todosPtos not in ptosRemover:
+                                        ptosRemover.append(todosPtos)
+                                    break
+                        #del ruasLocal[k.getNome()]
+
+                    for k in ptosRemover:
+                        ptosLocal.remove(k)
+                    ruasAtendidas = []
+                    ptosRemover = []
+
+#------------------------------------------------------------------------------------------------
+#-------------------------------Caso o splitter primerio seja 1/16-------------------------------
+#------------------------------------------------------------------------------------------------
+            elif splitterPrim == '1/16':
+                for w in range(1, 16):
+                    desenhaCaminhoMin(cOfficeID, ptosLocal[0].getId(), colors[w].get_hex_l(), w)
+
+                    for x in idRuasLocal:
+                        if ptosLocal[0] in ruasLocal[x].getPtos():
+                            ruasEsquina.append(ruasLocal[x])
+                    if len(ruasEsquina) == 0:
+                        break
+
+                    sobra = 8
+                    ptosLocal.remove(ptosLocal[0])
+
+
+                    for k in ruasEsquina:
+                        if sobra <= 0:
+                            break
+
+                        elif k.getDemanda() - sobra <= 0:
+                            ruasAtendidas.append(k)
+                            sobra -= k.getDemanda()
+
+                        else:
+                            k.setDemanda(k.getDemanda() - sobra)
+                            sobra = 0
+
+                    for k in ruasAtendidas:  # NAO É n^3
+                        #print(k.getNome())
+                        if k.getNome() in idRuasLocal:
+                            idRuasLocal.remove(k.getNome())
+                        for ptoRua in k.getPtos():
+                            for todosPtos in ptosLocal:
+                                if ptoRua.getId() == todosPtos.getId():
+                                    if todosPtos not in ptosRemover:
+                                        ptosRemover.append(todosPtos)
+                                    break
+                        #del ruasLocal[k.getNome()]
+
+                    for k in ptosRemover:
+                        ptosLocal.remove(k)
+                    ruasAtendidas = []
+                    ptosRemover = []
+
+#------------------------------------------------------------------------------------------------
+#-------------------------------Caso o splitter primerio seja 1/32-------------------------------
+#------------------------------------------------------------------------------------------------
+            elif splitterPrim == '1/32':
+                for w in range(1, 32):
+                    desenhaCaminhoMin(cOfficeID, ptosLocal[0].getId(), colors[w].get_hex_l(), w)
+
+                    for x in idRuasLocal:
+                        if ptosLocal[0] in ruasLocal[x].getPtos():
+                            ruasEsquina.append(ruasLocal[x])
+                    if len(ruasEsquina) == 0:
+                        break
+
+                    sobra = 4
+                    ptosLocal.remove(ptosLocal[0])
+
+
+                    for k in ruasEsquina:
+                        if sobra <= 0:
+                            break
+
+                        elif k.getDemanda() - sobra <= 0:
+                            ruasAtendidas.append(k)
+                            sobra -= k.getDemanda()
+
+                        else:
+                            k.setDemanda(k.getDemanda() - sobra)
+                            sobra = 0
+
+                    for k in ruasAtendidas:  # NAO É n^3
+                        #print(k.getNome())
+                        if k.getNome() in idRuasLocal:
+                            idRuasLocal.remove(k.getNome())
+                        for ptoRua in k.getPtos():
+                            for todosPtos in ptosLocal:
+                                if ptoRua.getId() == todosPtos.getId():
+                                    if todosPtos not in ptosRemover:
+                                        ptosRemover.append(todosPtos)
+                                    break
+                        #del ruasLocal[k.getNome()]
+
+                    for k in ptosRemover:
+                        ptosLocal.remove(k)
+                    ruasAtendidas = []
+                    ptosRemover = []
+
+#------------------------------------------------------------------------------------------------
+#-------------------------------Caso o splitter primerio seja 1/64-------------------------------
+#------------------------------------------------------------------------------------------------
+            elif splitterPrim == '1/64':
+                for w in range(1, 64):
+                    desenhaCaminhoMin(cOfficeID, ptosLocal[0].getId(), colors[w].get_hex_l(), w)
+
+                    for x in idRuasLocal:
+                        if ptosLocal[0] in ruasLocal[x].getPtos():
+                            ruasEsquina.append(ruasLocal[x])
+                    if len(ruasEsquina) == 0:
+                        break
+
+                    sobra = 2
+                    ptosLocal.remove(ptosLocal[0])
+
+
+                    for k in ruasEsquina:
+                        if sobra <= 0:
+                            break
+
+                        elif k.getDemanda() - sobra <= 0:
+                            ruasAtendidas.append(k)
+                            sobra -= k.getDemanda()
+
+                        else:
+                            k.setDemanda(k.getDemanda() - sobra)
+                            sobra = 0
+
+                    for k in ruasAtendidas:  # NAO É n^3
+                        #print(k.getNome())
+                        if k.getNome() in idRuasLocal:
+                            idRuasLocal.remove(k.getNome())
+                        for ptoRua in k.getPtos():
+                            for todosPtos in ptosLocal:
+                                if ptoRua.getId() == todosPtos.getId():
+                                    if todosPtos not in ptosRemover:
+                                        ptosRemover.append(todosPtos)
+                                    break
+                        #del ruasLocal[k.getNome()]
+
+                    for k in ptosRemover:
+                        ptosLocal.remove(k)
+                    ruasAtendidas = []
+                    ptosRemover = []
 
         fig3.savefig("ClustersImg/temp" + str(contaFig) + ".png", dpi=1000)
         aCmin.cla()
@@ -609,19 +789,24 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
 
 
         print("Iteracao : " + str(contaFig))
-        print ("quantidade de pontos removidos" + str(qtdAnt - len(ptosLocal)))
 
 
-    for x in sorted(todasRuasAtendidas):
-        print(x)
+    #for x in sorted(todasRuasAtendidas):
+    #   print(x)
 
-    print('Splitters 1/2 utilizados : ' + str(splitterQtd['1/2']))
-    print('Splitters 1/4 utilizados : ' + str(splitterQtd['1/4']))
-    print('Splitters 1/8 utilizados : ' + str(splitterQtd['1/8']))
-    print('Splitters 1/16 utilizados : ' + str(splitterQtd['1/16']))
-    print('Splitters 1/32 utilizados : ' + str(splitterQtd['1/32']))
-    print('Splitters 1/64 utilizados : ' + str(splitterQtd['1/64']))
+    print('Splitters Primários 1/2 utilizados : ' + str(splitterPrimQtd['1/2']))
+    print('Splitters Primários 1/4 utilizados : ' + str(splitterPrimQtd['1/4']))
+    print('Splitters Primários 1/8 utilizados : ' + str(splitterPrimQtd['1/8']))
+    print('Splitters Primários 1/16 utilizados : ' + str(splitterPrimQtd['1/16']))
+    print('Splitters Primários 1/32 utilizados : ' + str(splitterPrimQtd['1/32']))
+    print('Splitters Primários 1/64 utilizados : ' + str(splitterPrimQtd['1/64']))
 
+    print('Splitters Secundários 1/2 utilizados : ' + str(splitterSecQtd['1/2']))
+    print('Splitters Secundários 1/4 utilizados : ' + str(splitterSecQtd['1/4']))
+    print('Splitters Secundários 1/8 utilizados : ' + str(splitterSecQtd['1/8']))
+    print('Splitters Secundários 1/16 utilizados : ' + str(splitterSecQtd['1/16']))
+    print('Splitters Secundários 1/32 utilizados : ' + str(splitterSecQtd['1/32']))
+    print('Splitters Secundários 1/64 utilizados : ' + str(splitterSecQtd['1/64']))
 
 '''-----------------------------------------------------------------------------------'''
 '''--Passo um Definir o limite da área do projeto e a (demanda potencial*. todo)-------'''
@@ -823,17 +1008,23 @@ if enableMatPlot:
     for x in sorted(pontos, key=lambda name: pontos[name].getDistCOffice()):
         pontosOrd.append(pontos[x])
 
-
-    #ptosRem = []
-    #for x in pontosOrd:
-    #    if x.getEsq() > 2:
-    #        ptosRem.append(x)
-
-    #for x in ptosRem:
-    #    pontosOrd.remove(x)
-
+    print(len(pontosOrd))
     pontosOrdRemove = []
-    ptoAnt = Pontos()
+    ptoAnt = pontosOrd[0]
+    contador = 0
+    for x in pontosOrd:
+        if contador == 0:
+            contador += 1
+            continue
+
+        elif distanciaPtos(ptoAnt, x) < 50:
+            pontosOrdRemove.append(x)
+
+        ptoAnt = x
+
+    for x in pontosOrdRemove:
+        pontosOrd.remove(x)
+    print(len(pontosOrd))
 
     ruasSemRepetido = dict()
     idRuasSemRep = idRuas
