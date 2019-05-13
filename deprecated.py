@@ -103,3 +103,123 @@ def clusterForcaBrutaV2(ptosOrd):
         #gmap.draw('map' + str(contaFig) + '.html')
         aCmin.cla()
         contaFig += 1
+
+
+def clusterForcaBrutaDemanda(ptosOrd, ruasSR, idRuasSR):
+    todasRuasAtendidas = []
+    global contaFig
+    contaFig = 0
+    ptosLocal = ptosOrd
+    ruasLocal = ruasSR
+    idRuasLocal = idRuasSR
+
+    while ptosLocal[0].getDistCOffice() == -1:
+        del ptosLocal[0]
+
+    while len(ptosLocal) > 0:
+        qtdAnt = len(ptosLocal)
+        ruasEsquina = []
+        ruasAtendidas = []
+        demandaTotal = 0
+
+        nx.draw_networkx(G, node_size=0.5, node_color='grey', alpha=0.5, with_labels=False, pos=posPontos)
+        contEsq = 0
+        # ptoIni = ptosLocal.pop(0)
+        # desenhaCaminhoMin(ptoIni.getId(), cOfficeID, colors[0].get_hex_l(), 0)
+
+        '''
+        for x in idRuasLocal:
+            if ptoIni in ruasLocal[x].getPtos():
+                ruasEsquina.append(ruasLocal[x])
+
+        for k in ruasEsquina:
+            demandaTotal += k.getDemanda()
+            if demandaTotal > 128:
+                demandaTotal -= k.getDemanda()
+            else:
+                todasRuasAtendidas.append(k.getNome())
+                ruasAtendidas.append(k)
+
+        #print("ANTES")
+        #print(len(ptos))
+        for k in ruasAtendidas: # NAO É n^3
+            del ruasLocal[k.getNome()]
+            for ids in idRuasLocal:
+                if ids == k.getNome():
+                    idRuasLocal.remove(ids)
+            for p in k.getPtos():
+                if p.getEsq() > 1:
+                    for q in ptosLocal:
+                        if p.getId() == q.getId():
+                            ptosLocal.remove(q)
+        #print("DEPOIS")
+        #print(len(ptos))
+
+        for x in ptosLocal:
+            x.setDistAnt(caminhoMinimo(x.getId(), ptoIni.getId()))
+
+        ptosLocal = sorted(ptosLocal, key = Pontos.getDistAnt)
+        '''
+
+        while contEsq < esqMax and contEsq < len(ptosLocal):
+            ptosRemover = []
+            ruasEsquina = []
+            ruasAtendidas = []
+            demandaTotal = 0
+
+            # tamCabo = ptoIni.getDistCOffice() + caminhoMinimo(ptoIni.getId(), ptosLocal[contEsq].getId())
+            tamCabo = caminhoMinimo(cOfficeID, ptosLocal[contEsq].getId())
+
+            atenuacao = calculaAtenua(tamCabo / 1000, mono_1310, 2, conector, 6, emendaFusao,
+                                      (divisor1_16 + divisor1_4))
+            if tamCabo < 20000 and atenuacao < potsaida:
+                # print("Distancia da esquina " + str(contEsq) + " eh : " +
+                #     str(tamCabo) + "e a atenuacao eh : " + str(atenuacao))
+
+                desenhaCaminhoMin(cOfficeID, ptosLocal[contEsq].getId(), colors[contEsq].get_hex_l(), contEsq + 1)
+                ptosRemover.append(ptosLocal[contEsq])
+
+                for x in idRuasLocal:
+                    if ptosLocal[contEsq] in ruasLocal[x].getPtos():
+                        ruasEsquina.append(ruasLocal[x])
+
+                for k in ruasEsquina:
+                    demandaTotal += k.getDemanda()
+                    if demandaTotal > 128:
+                        demandaTotal -= k.getDemanda()
+                    else:
+                        todasRuasAtendidas.append(k.getNome())
+                        ruasAtendidas.append(k)
+
+                for k in ruasAtendidas:  # NAO É n^3
+                    if k.getNome() in idRuasLocal:
+                        idRuasLocal.remove(k.getNome())
+                    for ptoRua in k.getPtos():
+                        for todosPtos in ptosLocal:
+                            if ptoRua.getId() == todosPtos.getId():
+                                if ptosLocal[contEsq] not in ptosRemover:
+                                    ptosRemover.append(ptosLocal[contEsq])
+
+                                # ptosLocal.remove(todosPtos)
+                                break
+
+                    del ruasLocal[k.getNome()]
+
+                for k in ptosRemover:
+                    ptosLocal.remove(k)
+                contEsq += 1
+
+        # for x in ptosLocal:
+        #    x.setDistAnt(-1)
+
+        fig3.savefig("ClustersImg/temp" + str(contaFig) + ".png", dpi=1000)
+        # fig3.savefig("temp" + str(contaFig) + ".eps", format='eps', dpi=1000)
+        # gmap.draw('map' + str(contaFig) + '.html')
+        aCmin.cla()
+        contaFig += 1
+
+        # print("Iteracao : " + str(contaFig))
+        # print ("quantidade de pontos removidos" + str(qtdAnt - len(ptosLocal)))
+
+    # for x in sorted(todasRuasAtendidas):
+    #    print(x)

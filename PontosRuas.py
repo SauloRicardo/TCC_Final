@@ -8,6 +8,7 @@ class Pontos(object):
         self.lon = 0
         self.pos = [0,0]
         self.esq = 0
+        self.demanda = 0
         self.distCOffice = -1
         self.distAnt = -1
         self.ptoLiga = []
@@ -28,6 +29,9 @@ class Pontos(object):
 
     def incEsq (self):
         self.esq = self.esq + 1
+
+    def setDemanda(self, demanda):
+        self.demanda = demanda
 
     def getId(self):
         return self.id
@@ -58,3 +62,6 @@ class Pontos(object):
 
     def getDistAnt(self):
         return self.distAnt
+
+    def getDemanda(self):
+        return self.demanda

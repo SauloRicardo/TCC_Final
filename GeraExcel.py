@@ -50,7 +50,7 @@ fig3, aCmin = plt.subplots()
 
 contaFig = 0
 
-tree = ET.ElementTree(file='Xmls/formiga.xml')
+tree = ET.ElementTree(file='Xmls/carmodocajuru.xml')
 root = tree.getroot()
 
 potsaida = float(ConfigSectionMap('office')['potsaida'])
@@ -272,7 +272,9 @@ for x in ruas_ordenadas:
     idRuas.append(x.getId())
     nomesRuas.append(x.getNome())
     #tamanhoRuas.append(str(x.getTamRua()))
-    demandaRuas.append(int(np.ceil((np.random.weibull(5.)*x.getTamRua()/20))))
+    aux = int(np.ceil((np.random.weibull(5.)*x.getTamRua()/10)))
+    demandaRuas.append(aux)
+    i += aux
 
 dicionarioExcel = {
     #"Tamanho da Rua": tamanhoRuas,
@@ -285,8 +287,11 @@ for x in dicionarioExcel:
     print(x)
     print(dicionarioExcel[x])
 
+print(i)
+
 sheet = pyexcel.get_sheet(adict=dicionarioExcel)
 sheet.save_as("demanda.csv")
+
 
 #sheet = pyexcel.get_sheet(file_name='demanda.csv')
 #for row in sheet:

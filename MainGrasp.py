@@ -95,7 +95,7 @@ random.shuffle(colors)
 plt.rcParams['figure.figsize'] = (16, 9)
 plt.style.use('ggplot')
 
-distanciaTeste = 1500
+distanciaTeste = 2000
 
 G = nx.Graph()
 
@@ -148,12 +148,7 @@ def calculaTamRua(rua):
     return tamanhoRua
 
 def caminhoMinimo(idPto1, idPto2):
-    try:
-        caminho = nx.dijkstra_path(G, source=idPto1, target=idPto2)
-
-    except nx.NetworkXNoPath:
-        print('No path')
-        return -1
+    caminho = nx.dijkstra_path(G, source=idPto1, target=idPto2)
     #caminho = nx.shortest_path(G, source=idPto1, target=idPto2)
     anterior = caminho[0]
     total = 0
@@ -169,13 +164,7 @@ def caminhoMinimo(idPto1, idPto2):
     return total
 
 def desenhaCaminhoMin(idPto1, idPto2, cor, num):
-    try:
-        caminho = nx.dijkstra_path(G, source=idPto1, target=idPto2)
-
-    except nx.NetworkXNoPath:
-        print('No path')
-        return
-
+    caminho = nx.dijkstra_path(G, source=idPto1, target=idPto2)
     anterior = 0
     if len(caminho) > 0:
         aCmin.scatter(pontos[caminho[0]].getLat(), pontos[caminho[0]].getLon(), marker='x', s=0.5, c=cor)
@@ -201,24 +190,15 @@ def calculaAtenua(compCabo, perdaCabo, numConect, perdaConect, numEmenda, perdaE
 
     return atenuacao
 
-def criaDicRuasEsquina():
-    dicRuasEsquinas = dict()
-    for ru in idRuas:
-        for idPt in listaIdPtos:
-            if pontos[idPt] in ruas[ru].getPtos():
-                dicRuasEsquinas[idPt] = []
-                dicRuasEsquinas[idPt].append(ruas[ru])
-                pontos[idPt].setDemanda(pontos[idPt].getDemanda() + ruas[ru].getDemanda())
+def escolheEsquina(pontosEscolhe):
 
-    return dicRuasEsquinas
+    return np.random.choice(pontosEscolhe)
 
 def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
-
     todasRuasAtendidas = []
     global contaFig
     contaFig = 0
     ptosLocal = ptosOrd
-
     ruasLocal = ruasSR
     idRuasLocal = idRuasSR
     splitterPrimQtd = [('1/2', 0), ('1/4', 0), ('1/8', 0), ('1/16', 0), ('1/32', 0), ('1/64', 0)]
@@ -240,9 +220,6 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
         splitterSec  = ''
 
         tamCabo = caminhoMinimo(cOfficeID, ptosLocal[0].getId())
-        if tamCabo == -1:
-            break
-
         if tamCabo >= 20000:
             print("CABO TA GRANDÃO MANO VAMO PARA AI")
 
@@ -947,13 +924,38 @@ print("draw")
 
 if enableMatPlot:
 
+    pontosOrd = []
+    for x in sorted(pontos, key=lambda name: pontos[name].getDistCOffice()):
+        pontosOrd.append(pontos[x])
+
+
+    while pontosOrd[0].getDistCOffice() == -1:
+        del pontosOrd[0]
+
+    print(len(pontosOrd))
+    pontosOrdRemove = []
+    ptoAnt = pontosOrd[0]
+    contador = 0
+    for x in pontosOrd:
+        if contador == 0:
+            contador += 1
+            continue
+
+        elif distanciaPtos(ptoAnt, x) < 50:
+            pontosOrdRemove.append(x)
+
+        ptoAnt = x
+
+    for x in pontosOrdRemove:
+        pontosOrd.remove(x)
+    print(len(pontosOrd))
+
     ruasSemRepetido = dict()
-    idRuasSemRep = []
+    idRuasSemRep = idRuas
 
     for x in idRuas:
         if ruas[x].getNome() not in ruasSemRepetido:
             ruasSemRepetido[ruas[x].getNome()] = ruas[x]
-            idRuasSemRep.append(x)
 
         else:
             ptosAux = ruas[x].getPtos()
@@ -966,47 +968,6 @@ if enableMatPlot:
             demandaAux = ruasSemRepetido[ruas[x].getNome()].getDemanda() + ruas[x].getDemanda()
             ruasSemRepetido[ruas[x].getNome()].setDemanda(demandaAux)
 
-    dicEsquinas = criaDicRuasEsquina()
-
-    pontosOrdDist  = []
-    for x in sorted(pontos, key=lambda name: pontos[name].getDistCOffice()):
-        pontosOrdDist.append(pontos[x])
-
-
-    pontosOrdRemove = []
-    ptoAnt = pontosOrdDist[0]
-    contador = 0
-    for x in pontosOrdDist:
-        if contador == 0:
-            contador += 1
-            continue
-
-        elif distanciaPtos(ptoAnt, x) < 50:
-            pontosOrdRemove.append(x)
-
-        ptoAnt = x
-
-    for x in pontosOrdRemove:
-        pontosOrdDist.remove(x)
-
-
-    pontosOrdDeman = []
-    for x in sorted(pontos, key=lambda name: pontos[name].getDemanda(), reverse=True):
-        pontosOrdDeman.append(pontos[x])
-
-    '''
-    print(len(pontosOrdDeman))
-    pontosOrdRemove = []
-    for x in pontosOrdDeman:
-        if x not in pontosOrdDist:
-            pontosOrdRemove.append(x)
-
-    for x in pontosOrdRemove:
-        pontosOrdDeman.remove(x)
-
-    print(len(pontosOrdDeman))
-    '''
-
     #for x in sorted(listaNomesRuas):
     #    print("Nome da rua : " + ruasSemRepetido[x].getNome() + "Demanda da rua : " + str(ruasSemRepetido[x].getDemanda()))
 
@@ -1014,8 +975,7 @@ if enableMatPlot:
     #print(sorted(listaNomesRuas))
     #for x in ruasSemRepetido['Rua 13 de Maio'].getPtos():
     #    print(x.getId())
-
-    clusterForcaBrutaSplitVar(pontosOrdDeman, ruasSemRepetido, listaNomesRuas)
+    clusterForcaBrutaSplitVar(pontosOrd, ruasSemRepetido, listaNomesRuas)
 
     fim = time.time()
     print("O tempo de execução foi = "+ str(fim - inicio))
