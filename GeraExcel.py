@@ -272,7 +272,8 @@ for x in ruas_ordenadas:
     idRuas.append(x.getId())
     nomesRuas.append(x.getNome())
     #tamanhoRuas.append(str(x.getTamRua()))
-    aux = int(np.ceil((np.random.weibull(5.)*x.getTamRua()/10)))
+    #aux = int(np.ceil((np.random.weibull(5.)*x.getTamRua()/10)))
+    aux = 4
     demandaRuas.append(aux)
     i += aux
 

@@ -55,7 +55,7 @@ cOfficeLon = ConfigSectionMap('office')['lon']
 
 #fig, ax = plt.subplots()
 
-#fig2, ab = plt.subplots()
+#todo fig2, ab = plt.subplots()   PLOTTAR TODAS AS FIBRAS NA CIDADE
 
 fig3, aCmin = plt.subplots()
 
@@ -217,6 +217,8 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
     todasRuasAtendidas = []
     global contaFig
     contaFig = 0
+    totalFibra = 0
+    totalAtendidos = 0
     ptosLocal = ptosOrd
 
     ruasLocal = ruasSR
@@ -249,7 +251,8 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
         if tamCabo < 20000:
             for x in idRuasLocal:
                 if ptosLocal[0] in ruasLocal[x].getPtos():
-                    ruasEsquina.append(ruasLocal[x])
+                    if ruasLocal[x] not in ruasEsquina and ruasLocal[x].getDemanda() > 0:
+                        ruasEsquina.append(ruasLocal[x])
 
             if len(ruasEsquina) == 0:
                 ptosLocal.remove(ptosLocal[0])
@@ -261,6 +264,8 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
             if len(ptosLocal) == 0:
                 break
 
+            atendidosUmaFibra = 0
+
             if ruasEsquina[0].getDemanda() > 64 and calculaAtenua(tamCabo/1000, mono_1310, 2, conector, 6, emendaFusao, (divisor1_2 + divisor1_64)):
                 splitterPrim = '1/2'
                 splitterSec = '1/64'
@@ -269,6 +274,7 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
                 ruasEsquina[0].setDemanda(ruasEsquina[0].getDemanda() - 64)
                 ptosLocal.remove(ptosLocal[0])
                 sobra = 0
+                atendidosUmaFibra = 64
 
             elif ruasEsquina[0].getDemanda() > 32 and calculaAtenua(tamCabo/1000, mono_1310, 2, conector, 6, emendaFusao, (divisor1_2 + divisor1_64)):
                 splitterPrim = '1/2'
@@ -276,21 +282,30 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
                 splitterPrimQtd[splitterPrim] += 1
                 splitterSecQtd[splitterSec] += 2
                 ruasAtendidas.append(ruasEsquina[0])
+                todasRuasAtendidas.append(ruasEsquina[0])
+                atendidosUmaFibra = ruasEsquina[0].getDemanda()
+
                 if ruasEsquina[0].getDemanda() == 64:
                     sobra = 0
+                    ruasEsquina.remove(ruasEsquina[0])
                 else:
                     sobra = 64 - ruasEsquina[0].getDemanda()
-                ruasEsquina.remove(ruasEsquina[0])
+                    ruasEsquina.remove(ruasEsquina[0])
 
                 for k in ruasEsquina:
                     if sobra <= 0:
                         break
-                    else:
-                        sobraAux = sobra
+
+                    elif k.getDemanda() - sobra <= 0:
+                        ruasAtendidas.append(k)
+                        todasRuasAtendidas.append(k)
                         sobra -= k.getDemanda()
-                        k.setDemanda(k.getDemanda()-sobraAux)
-                        if k.getDemanda() <= 0:
-                            ruasAtendidas.append(k)
+                        atendidosUmaFibra += k.getDemanda()
+
+                    else:
+                        atendidosUmaFibra += sobra
+                        k.setDemanda(k.getDemanda()-sobra)
+                        sobra = 0
 
             elif ruasEsquina[0].getDemanda() > 16 and calculaAtenua(tamCabo/1000, mono_1310, 2, conector, 6, emendaFusao, (divisor1_4 + divisor1_32)):
                 splitterPrim = '1/4'
@@ -299,21 +314,29 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
                 splitterSecQtd[splitterSec] += 4
                 ruasAtendidas.append(ruasEsquina[0])
                 todasRuasAtendidas.append(ruasEsquina[0])
+                atendidosUmaFibra = ruasEsquina[0].getDemanda()
+
                 if ruasEsquina[0].getDemanda() == 32:
                     sobra = 0
+                    ruasEsquina.remove(ruasEsquina[0])
                 else:
                     sobra = 32 - ruasEsquina[0].getDemanda()
+                    ruasEsquina.remove(ruasEsquina[0])
 
                 for k in ruasEsquina:
                     if sobra <= 0:
                         break
-                    else:
-                        sobraAux = sobra
+
+                    elif k.getDemanda() - sobra <= 0:
+                        ruasAtendidas.append(k)
+                        todasRuasAtendidas.append(k)
                         sobra -= k.getDemanda()
-                        k.setDemanda(k.getDemanda()-sobraAux)
-                        if k.getDemanda() <= 0:
-                            ruasAtendidas.append(k)
-                            todasRuasAtendidas.append(k)
+                        atendidosUmaFibra += k.getDemanda()
+
+                    else:
+                        atendidosUmaFibra += sobra
+                        k.setDemanda(k.getDemanda()-sobra)
+                        sobra = 0
 
             elif ruasEsquina[0].getDemanda() > 8 and calculaAtenua(tamCabo/1000, mono_1310, 2, conector, 6, emendaFusao, (divisor1_8 + divisor1_16)):
                 splitterPrim = '1/8'
@@ -322,21 +345,28 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
                 splitterSecQtd[splitterSec] += 8
                 ruasAtendidas.append(ruasEsquina[0])
                 todasRuasAtendidas.append(ruasEsquina[0])
+                atendidosUmaFibra = ruasEsquina[0].getDemanda()
                 if ruasEsquina[0].getDemanda() == 16:
                     sobra = 0
+                    ruasEsquina.remove(ruasEsquina[0])
                 else:
                     sobra = 16 - ruasEsquina[0].getDemanda()
+                    ruasEsquina.remove(ruasEsquina[0])
 
                 for k in ruasEsquina:
                     if sobra <= 0:
                         break
-                    else:
-                        sobraAux = sobra
+
+                    elif k.getDemanda() - sobra <= 0:
+                        ruasAtendidas.append(k)
+                        todasRuasAtendidas.append(k)
                         sobra -= k.getDemanda()
-                        k.setDemanda(k.getDemanda()-sobraAux)
-                        if k.getDemanda() <= 0:
-                            ruasAtendidas.append(k)
-                            todasRuasAtendidas.append(k)
+                        atendidosUmaFibra += k.getDemanda()
+
+                    else:
+                        atendidosUmaFibra += sobra
+                        k.setDemanda(k.getDemanda()-sobra)
+                        sobra = 0
 
             elif ruasEsquina[0].getDemanda() > 4 and calculaAtenua(tamCabo/1000, mono_1310, 2, conector, 6, emendaFusao, (divisor1_16 + divisor1_8)):
                 splitterPrim = '1/16'
@@ -345,21 +375,28 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
                 splitterSecQtd[splitterSec] += 16
                 ruasAtendidas.append(ruasEsquina[0])
                 todasRuasAtendidas.append(ruasEsquina[0])
+                atendidosUmaFibra = ruasEsquina[0].getDemanda()
                 if ruasEsquina[0].getDemanda() == 8:
                     sobra = 0
+                    ruasEsquina.remove(ruasEsquina[0])
                 else:
                     sobra = 8 - ruasEsquina[0].getDemanda()
+                    ruasEsquina.remove(ruasEsquina[0])
 
                 for k in ruasEsquina:
                     if sobra <= 0:
                         break
-                    else:
-                        sobraAux = sobra
+
+                    elif k.getDemanda() - sobra <= 0:
+                        ruasAtendidas.append(k)
+                        todasRuasAtendidas.append(k)
                         sobra -= k.getDemanda()
-                        k.setDemanda(k.getDemanda()-sobraAux)
-                        if k.getDemanda() <= 0:
-                            ruasAtendidas.append(k)
-                            todasRuasAtendidas.append(k)
+                        atendidosUmaFibra += k.getDemanda()
+
+                    else:
+                        atendidosUmaFibra += sobra
+                        k.setDemanda(k.getDemanda()-sobra)
+                        sobra = 0
 
             elif ruasEsquina[0].getDemanda() > 2 and calculaAtenua(tamCabo/1000, mono_1310, 2, conector, 6, emendaFusao, (divisor1_32 + divisor1_4)):
                 splitterPrim = '1/32'
@@ -368,56 +405,72 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
                 splitterSecQtd[splitterSec] += 32
                 ruasAtendidas.append(ruasEsquina[0])
                 todasRuasAtendidas.append(ruasEsquina[0])
+                atendidosUmaFibra = ruasEsquina[0].getDemanda()
                 if ruasEsquina[0].getDemanda() == 4:
                     sobra = 0
+                    ruasEsquina.remove(ruasEsquina[0])
                 else:
                     sobra = 4 - ruasEsquina[0].getDemanda()
+                    ruasEsquina.remove(ruasEsquina[0])
 
                 for k in ruasEsquina:
                     if sobra <= 0:
                         break
-                    else:
-                        sobraAux = sobra
+
+                    elif k.getDemanda() - sobra <= 0:
+                        ruasAtendidas.append(k)
+                        todasRuasAtendidas.append(k)
                         sobra -= k.getDemanda()
-                        k.setDemanda(k.getDemanda()-sobraAux)
-                        if k.getDemanda() <= 0:
-                            ruasAtendidas.append(k)
-                            todasRuasAtendidas.append(k)
+                        atendidosUmaFibra += k.getDemanda()
+
+                    else:
+                        atendidosUmaFibra += sobra
+                        k.setDemanda(k.getDemanda()-sobra)
+                        sobra = 0
 
             elif calculaAtenua(tamCabo/1000, mono_1310, 2, conector, 6, emendaFusao, (divisor1_2 + divisor1_64)):
                 splitterPrim = '1/64'
                 splitterSec = '1/2'
                 splitterPrimQtd[splitterPrim] += 1
                 splitterSecQtd[splitterSec] += 64
+
                 ruasAtendidas.append(ruasEsquina[0])
                 todasRuasAtendidas.append(ruasEsquina[0])
+                atendidosUmaFibra = ruasEsquina[0].getDemanda()
+
                 if ruasEsquina[0].getDemanda() == 2:
                     sobra = 0
+                    ruasEsquina.remove(ruasEsquina[0])
                 else:
-                    sobra = 1 - ruasEsquina[0].getDemanda()
+                    sobra = 2 - ruasEsquina[0].getDemanda()
+                    ruasEsquina.remove(ruasEsquina[0])
 
                 for k in ruasEsquina:
                     if sobra <= 0:
                         break
-                    else:
-                        sobraAux = sobra
+
+                    elif k.getDemanda() - sobra <= 0:
+                        ruasAtendidas.append(k)
+                        todasRuasAtendidas.append(k)
                         sobra -= k.getDemanda()
-                        k.setDemanda(k.getDemanda()-sobraAux)
-                        if k.getDemanda() <= 0:
-                            ruasAtendidas.append(k)
-                            todasRuasAtendidas.append(k)
+                        atendidosUmaFibra += k.getDemanda()
+
+                    else:
+                        atendidosUmaFibra += sobra
+                        k.setDemanda(k.getDemanda()-sobra)
+                        sobra = 0
 
             for k in ruasAtendidas:  # NAO É n^3
-                #print(k.getNome())
-                if k.getNome() in idRuasLocal:
-                    idRuasLocal.remove(k.getNome())
+                idRuasLocal.remove(k.getNome())
+                del ruasLocal[k.getNome()]
+
                 for ptoRua in k.getPtos():
                     for todosPtos in ptosLocal:
                         if ptoRua.getId() == todosPtos.getId():
                             if todosPtos not in ptosRemover:
                                 ptosRemover.append(todosPtos)
                             break
-                del ruasLocal[k.getNome()]
+#                del ruasLocal[k.getNome()]
 
             for k in ptosRemover:
                 ptosLocal.remove(k)
@@ -434,6 +487,7 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
 #------------------------------------------------------------------------------------------------
 #-------------------------------Caso o splitter primerio seja 1/2--------------------------------
 #------------------------------------------------------------------------------------------------
+            caboDrop = distanciaPtos(pontos[cOfficeID], ptosLocal[0]) * 1.1
             if splitterPrim == '1/2':
                 if len(ptosLocal) == 0:
                     break
@@ -441,7 +495,8 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
 
                 for x in idRuasLocal:
                     if ptosLocal[0] in ruasLocal[x].getPtos():
-                        ruasEsquina.append(ruasLocal[x])
+                        if ruasLocal[x] not in ruasEsquina:
+                            ruasEsquina.append(ruasLocal[x])
 
                 ptosLocal.remove(ptosLocal[0])
                 if len(ruasEsquina) == 0:
@@ -456,13 +511,17 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
                         ruasAtendidas.append(k)
                         todasRuasAtendidas.append(k)
                         sobra -= k.getDemanda()
+                        atendidosUmaFibra += k.getDemanda()
 
                     else:
+                        atendidosUmaFibra += sobra
                         k.setDemanda(k.getDemanda()-sobra)
                         sobra = 0
 
                 for k in ruasAtendidas:  # NAO É n^3
-                    #print(k.getNome())
+                    if k.getNome() in idRuasLocal:
+                        idRuasLocal.remove(k.getNome())
+                        del ruasLocal[k.getNome()]
                     if k.getNome() in idRuasLocal:
                         idRuasLocal.remove(k.getNome())
                     for ptoRua in k.getPtos():
@@ -471,12 +530,12 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
                                 if todosPtos not in ptosRemover:
                                     ptosRemover.append(todosPtos)
                                 break
-#                    del ruasLocal[k.getNome()]
 
                 for k in ptosRemover:
                     ptosLocal.remove(k)
 
                 ruasAtendidas = []
+                ruasEsquina = []
                 ptosRemover = []
 
 #------------------------------------------------------------------------------------------------
@@ -490,7 +549,8 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
 
                     for x in idRuasLocal:
                         if ptosLocal[0] in ruasLocal[x].getPtos():
-                            ruasEsquina.append(ruasLocal[x])
+                            if ruasLocal[x] not in ruasEsquina:
+                                ruasEsquina.append(ruasLocal[x])
 
                     ptosLocal.remove(ptosLocal[0])
                     if len(ruasEsquina) == 0:
@@ -506,12 +566,17 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
                             ruasAtendidas.append(k)
                             todasRuasAtendidas.append(k)
                             sobra -= k.getDemanda()
+                            atendidosUmaFibra += k.getDemanda()
 
                         else:
+                            atendidosUmaFibra += sobra
                             k.setDemanda(k.getDemanda() - sobra)
                             sobra = 0
 
                     for k in ruasAtendidas:  # NAO É n^3
+                        if k.getNome() in idRuasLocal:
+                            idRuasLocal.remove(k.getNome())
+                            del ruasLocal[k.getNome()]
                         #print(k.getNome())
                         if k.getNome() in idRuasLocal:
                             idRuasLocal.remove(k.getNome())
@@ -526,6 +591,7 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
                     for k in ptosRemover:
                         ptosLocal.remove(k)
                     ruasAtendidas = []
+                    ruasEsquina = []
                     ptosRemover = []
 
 # ------------------------------------------------------------------------------------------------
@@ -540,7 +606,8 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
 
                     for x in idRuasLocal:
                         if ptosLocal[0] in ruasLocal[x].getPtos():
-                            ruasEsquina.append(ruasLocal[x])
+                            if ruasLocal[x] not in ruasEsquina:
+                                ruasEsquina.append(ruasLocal[x])
 
                     ptosLocal.remove(ptosLocal[0])
                     if len(ruasEsquina) == 0:
@@ -555,26 +622,28 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
                             ruasAtendidas.append(k)
                             todasRuasAtendidas.append(k)
                             sobra -= k.getDemanda()
+                            atendidosUmaFibra += k.getDemanda()
 
                         else:
+                            atendidosUmaFibra += sobra
                             k.setDemanda(k.getDemanda() - sobra)
                             sobra = 0
 
                     for k in ruasAtendidas:  # NAO É n^3
-                        #print(k.getNome())
-                        if k.getNome() in idRuasLocal:
-                            idRuasLocal.remove(k.getNome())
+                        idRuasLocal.remove(k.getNome())
+                        del ruasLocal[k.getNome()]
+
                         for ptoRua in k.getPtos():
                             for todosPtos in ptosLocal:
                                 if ptoRua.getId() == todosPtos.getId():
                                     if todosPtos not in ptosRemover:
                                         ptosRemover.append(todosPtos)
                                     break
-                        #del ruasLocal[k.getNome()]
 
                     for k in ptosRemover:
                         ptosLocal.remove(k)
                     ruasAtendidas = []
+                    ruasEsquina = []
                     ptosRemover = []
 
 #------------------------------------------------------------------------------------------------
@@ -588,7 +657,8 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
 
                     for x in idRuasLocal:
                         if ptosLocal[0] in ruasLocal[x].getPtos():
-                            ruasEsquina.append(ruasLocal[x])
+                            if ruasLocal[x] not in ruasEsquina:
+                                ruasEsquina.append(ruasLocal[x])
 
                     ptosLocal.remove(ptosLocal[0])
                     if len(ruasEsquina) == 0:
@@ -605,12 +675,16 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
                             ruasAtendidas.append(k)
                             todasRuasAtendidas.append(k)
                             sobra -= k.getDemanda()
+                            atendidosUmaFibra += k.getDemanda()
 
                         else:
+                            atendidosUmaFibra += sobra
                             k.setDemanda(k.getDemanda() - sobra)
                             sobra = 0
 
                     for k in ruasAtendidas:  # NAO É n^3
+                        idRuasLocal.remove(k.getNome())
+                        del ruasLocal[k.getNome()]
                         #print(k.getNome())
                         if k.getNome() in idRuasLocal:
                             idRuasLocal.remove(k.getNome())
@@ -625,6 +699,7 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
                     for k in ptosRemover:
                         ptosLocal.remove(k)
                     ruasAtendidas = []
+                    ruasEsquina = []
                     ptosRemover = []
 
 #------------------------------------------------------------------------------------------------
@@ -639,7 +714,8 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
 
                     for x in idRuasLocal:
                         if ptosLocal[0] in ruasLocal[x].getPtos():
-                            ruasEsquina.append(ruasLocal[x])
+                            if ruasLocal[x] not in ruasEsquina:
+                                ruasEsquina.append(ruasLocal[x])
 
                     ptosLocal.remove(ptosLocal[0])
                     if len(ruasEsquina) == 0:
@@ -656,12 +732,18 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
                             ruasAtendidas.append(k)
                             todasRuasAtendidas.append(k)
                             sobra -= k.getDemanda()
+                            atendidosUmaFibra += k.getDemanda()
 
                         else:
+                            atendidosUmaFibra += sobra
                             k.setDemanda(k.getDemanda() - sobra)
                             sobra = 0
 
+                    #print("demanda do splitter secundario 4 ---- " + str(atendidosUmaFibra))
+
                     for k in ruasAtendidas:  # NAO É n^3
+                        idRuasLocal.remove(k.getNome())
+                        del ruasLocal[k.getNome()]
                         #print(k.getNome())
                         if k.getNome() in idRuasLocal:
                             idRuasLocal.remove(k.getNome())
@@ -676,6 +758,7 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
                     for k in ptosRemover:
                         ptosLocal.remove(k)
                     ruasAtendidas = []
+                    ruasEsquina = []
                     ptosRemover = []
 
 #------------------------------------------------------------------------------------------------
@@ -689,7 +772,8 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
 
                     for x in idRuasLocal:
                         if ptosLocal[0] in ruasLocal[x].getPtos():
-                            ruasEsquina.append(ruasLocal[x])
+                            if ruasLocal[x] not in ruasEsquina:
+                                ruasEsquina.append(ruasLocal[x])
 
                     ptosLocal.remove(ptosLocal[0])
                     if len(ruasEsquina) == 0:
@@ -704,28 +788,37 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
                             ruasAtendidas.append(k)
                             todasRuasAtendidas.append(k)
                             sobra -= k.getDemanda()
+                            atendidosUmaFibra += k.getDemanda()
 
                         else:
+                            atendidosUmaFibra += sobra
                             k.setDemanda(k.getDemanda() - sobra)
                             sobra = 0
 
                     for k in ruasAtendidas:  # NAO É n^3
-                        #print(k.getNome())
-                        if k.getNome() in idRuasLocal:
-                            idRuasLocal.remove(k.getNome())
+                        idRuasLocal.remove(k.getNome())
+                        del ruasLocal[k.getNome()]
+
                         for ptoRua in k.getPtos():
                             for todosPtos in ptosLocal:
                                 if ptoRua.getId() == todosPtos.getId():
                                     if todosPtos not in ptosRemover:
                                         ptosRemover.append(todosPtos)
                                     break
-                        #del ruasLocal[k.getNome()]
 
                     for k in ptosRemover:
                         ptosLocal.remove(k)
+
                     ruasAtendidas = []
+                    ruasEsquina = []
                     ptosRemover = []
 
+        print("quantidade de clientes atendidos com uma fibra : " + str(atendidosUmaFibra))
+        #print("tamanho do cabo drop : " + str(caboDrop))
+        totalFibra += caboDrop
+        totalAtendidos += atendidosUmaFibra
+        atendidosUmaFibra = 0
+        #aCmin.annotate(("Foram atendidos " + str(atendidosUmaFibra) + " de 128 possiveis"), xy=(0,0), fontsize = 'xx-small')
         fig3.savefig("ClustersImg/temp" + str(contaFig) + ".png", dpi=1000)
         aCmin.cla()
         contaFig += 1
@@ -733,7 +826,6 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
 
         print("Iteracao : " + str(contaFig))
 
-    print("Quantidade de ruas com clientes : " + str(len(ruasSR)) + "Quantidade de ruas atendidas : " + str(len(todasRuasAtendidas)))
     #for x in sorted(todasRuasAtendidas):
     #   print(x)
 
@@ -750,6 +842,9 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
     print('Splitters Secundários 1/16 utilizados : ' + str(splitterSecQtd['1/16']))
     print('Splitters Secundários 1/32 utilizados : ' + str(splitterSecQtd['1/32']))
     print('Splitters Secundários 1/64 utilizados : ' + str(splitterSecQtd['1/64']))
+    #print('Total de fibra óptica utilizada com margem de 10% : ' + str(totalFibra))
+    print('Total de clientes atendidos : ' + str(totalAtendidos))
+
 
 '''-----------------------------------------------------------------------------------'''
 '''--Passo um Definir o limite da área do projeto e a (demanda potencial*. todo)-------'''

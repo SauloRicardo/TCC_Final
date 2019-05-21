@@ -710,7 +710,7 @@ def clusterForcaBrutaSplitVar(ptosOrd, ruasSR, idRuasSR):
 
         print("Iteracao : " + str(contaFig))
 
-    print("Quantidade de ruas com clientes : " + str(len(ruasSR)) + "Quantidade de ruas atendidas : " + str(len(todasRuasAtendidas)))
+    #print("Quantidade de ruas com clientes : " + str(len(ruasSR)) + "Quantidade de ruas atendidas : " + str(len(todasRuasAtendidas)))
     #for x in sorted(todasRuasAtendidas):
     #   print(x)
 
